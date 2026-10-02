@@ -15,7 +15,7 @@ stage_2_bet = st.sidebar.number_input("गाजियाबाद (Stage 2):", 
 stage_3_bet = st.sidebar.number_input("गली (Stage 3):", value=300)
 stage_4_bet = st.sidebar.number_input("दिसावर (Stage 4):", value=500)
 
-# 2. Logic Calculations
+# 2. Logic Calculations (All Rules Included)
 A = dswr_live // 10
 B = dswr_live % 10
 palat_live = B * 10 + A
@@ -24,7 +24,34 @@ cut_map = {0:5, 1:6, 2:7, 3:8, 4:9, 5:0, 6:1, 7:2, 8:3, 9:4}
 cut_A = cut_map[A]
 cut_B = cut_map[B]
 
-# Mirror Harufs & Cut-Ank Rules
+# 1. दोस्त का नियम
+dost_ka_niyam = []
+for h in [A, B]:
+    for i in range(10):
+        dost_ka_niyam.append(h * 10 + i)
+        dost_ka_niyam.append(i * 10 + h)
+dost_ka_niyam = sorted(list(set([j for j in dost_ka_niyam if 0 <= j < 100])))
+
+# 2. बाज़ार की चाल
+market_ki_chaal = [(dswr_live + k) % 100 for k in [-2, -1, 1, 2]] + [(palat_live + k) % 100 for k in [-2, -1, 1, 2]]
+
+# 3. रवि का नियम
+ravi_ka_niyam = []
+for h in [cut_A, cut_B]:
+    for i in range(10):
+        ravi_ka_niyam.append(h * 10 + i)
+        ravi_ka_niyam.append(i * 10 + h)
+ravi_ka_niyam = sorted(list(set([j for j in ravi_ka_niyam if 0 <= j < 100])))
+
+# 4. रवि का नोयम
+ravi_ka_noyam = []
+for j in range(100):
+    j_A = j // 10
+    j_B = j % 10
+    if j_A in [A, B] or j_B in [A, B]:
+        ravi_ka_noyam.append(j)
+
+# 5. कट-अंक और हरूफ मिरर नियम
 mirror_harufs = list(set([A, B, cut_A, cut_B]))
 cut_ank_niyam = []
 for h1 in mirror_harufs:
@@ -33,13 +60,14 @@ for h1 in mirror_harufs:
         cut_ank_niyam.append(h2 * 10 + h1)
 cut_ank_niyam = sorted(list(set([j for j in cut_ank_niyam if 0 <= j < 100])))
 
-# 36 Master Jodis Pool
+# पंच-नियमों को मिलाकर ठीक 36 मास्टर जोड़ियाँ
 master_jodi_pool = []
 priority_jodis = [dswr_live, palat_live]
 
-for j in (priority_jodis + cut_ank_niyam):
+for j in (priority_jodis + cut_ank_niyam + dost_ka_niyam + market_ki_chaal + ravi_ka_niyam + ravi_ka_noyam):
     if j not in master_jodi_pool and 0 <= j < 100:
         master_jodi_pool.append(j)
+
 final_36_jodis = sorted(master_jodi_pool[:36])
 
 # 3. Output Display
